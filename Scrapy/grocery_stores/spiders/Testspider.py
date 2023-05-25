@@ -19,7 +19,7 @@ class TestspiderSpider(scrapy.Spider):
         yield SplashRequest(url=url,
                             callback=self.parse,
                             endpoint='execute',
-                            args={'lua_source': self.lua_script})
+                            args={'lua_source': self.lua_script, 'wait': 0.2})
 
     def parse(self, response: scrapy.http.Response):
         quotes: scrapy.selector.unified.SelectorList = response.xpath("//div[@class='quote']")

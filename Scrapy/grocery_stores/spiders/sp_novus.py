@@ -1,11 +1,12 @@
 import scrapy
 from scrapy_splash import SplashRequest
+from typing import Iterable
 
 
 class NovusSpider(scrapy.Spider):
-    name = "novus.online"
+    name = "sp_novus"
     allowed_domains = ["novus.online"]
-    start_urls_category = ['https://novus.online/category/ovochi-frukty-ta-horikhy',
+    start_urls_category = ('https://novus.online/category/ovochi-frukty-ta-horikhy',
                            'https://novus.online/category/molocne-ajca-sir',
                            'https://novus.online/category/maso-riba',
                            'https://novus.online/category/bakalia',
@@ -14,7 +15,7 @@ class NovusSpider(scrapy.Spider):
                            'https://novus.online/category/napoi',
                            'https://novus.online/category/zamorozeni-produkti',
                            'https://novus.online/category/alkogol'
-                           'https://novus.online/category/tutunovi-virobi-ta-aksesuari']
+                           'https://novus.online/category/tutunovi-virobi-ta-aksesuari')
 
     lua_get_page_script = """
         function main(splash, args)
@@ -25,15 +26,19 @@ class NovusSpider(scrapy.Spider):
     """
 
     def start_requests(self):
-        yield SplashRequest(
-            url='https://novus.online/',
-            callback=self.get_url_category,
-            endpoint='execute',
-            args={'lua_source': self.lua_get_page_script}
-        )
+        for url_category in self.start_urls_category:
+            yield SplashRequest(
+                url=url_category,
+                callback=self.get_url_subcategory,
+                endpoint='execute',
+                args={'lua_source': self.lua_get_page_script}
+            )
 
-    def get_url_category(self, response: scrapy.http.Response):
-        category_list = response.xpath("")
+    def get_url_subcategory(self, response: scrapy.http.Response):
+        subcategory_list = response.xpath("//div[@class='subcategories-list__item']/a/@href").getall()
+        for subcategory in subcategory_list:
+            subcategory_url = response.urljoin(subcategory)
+            yield
 
     def parse(self, response):
         print('--' * 20, response)
