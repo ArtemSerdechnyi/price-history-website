@@ -1,44 +1,34 @@
 import scrapy
 from scrapy_splash import SplashRequest
-from typing import Iterable
+
+from .common import DefaultSpider, DefaultLuaSpider
 
 
-class NovusSpider(scrapy.Spider):
+class NovusSpider(scrapy.Spider, DefaultSpider):
     name = "sp_novus"
     allowed_domains = ["novus.online"]
+    # start_urls_category = ('https://novus.online/category/ovochi-frukty-ta-horikhy',
+    #                        'https://novus.online/category/molocne-ajca-sir',
+    #                        'https://novus.online/category/maso-riba',
+    #                        'https://novus.online/category/bakalia',
+    #                        'https://novus.online/category/zootovari',
+    #                        'https://novus.online/category/solodosi-sneki',
+    #                        'https://novus.online/category/napoi',
+    #                        'https://novus.online/category/zamorozeni-produkti',
+    #                        'https://novus.online/category/alkogol'
+    #                        'https://novus.online/category/tutunovi-virobi-ta-aksesuari')
     start_urls_category = ('https://novus.online/category/ovochi-frukty-ta-horikhy',
                            'https://novus.online/category/molocne-ajca-sir',
-                           'https://novus.online/category/maso-riba',
-                           'https://novus.online/category/bakalia',
-                           'https://novus.online/category/zootovari',
-                           'https://novus.online/category/solodosi-sneki',
-                           'https://novus.online/category/napoi',
-                           'https://novus.online/category/zamorozeni-produkti',
-                           'https://novus.online/category/alkogol'
-                           'https://novus.online/category/tutunovi-virobi-ta-aksesuari')
-
-    lua_get_page_script = """
-        function main(splash, args)
-            url = args.url
-            assert(splash:go(url))
-            return splash:html()
-        end
-    """
+                           'https://novus.online/category/maso-riba')
 
     def start_requests(self):
         for url_category in self.start_urls_category:
-            yield SplashRequest(
-                url=url_category,
-                callback=self.get_url_subcategory,
-                endpoint='execute',
-                args={'lua_source': self.lua_get_page_script}
-            )
+            yield from self.splash_request(urls=url_category,
+                                           callback=self.get_url_subcategory)
 
     def get_url_subcategory(self, response: scrapy.http.Response):
         subcategory_list = response.xpath("//div[@class='subcategories-list__item']/a/@href").getall()
         for subcategory in subcategory_list:
             subcategory_url = response.urljoin(subcategory)
-            yield
+            print('-----', subcategory_url)
 
-    def parse(self, response):
-        print('--' * 20, response)

@@ -1,8 +1,10 @@
 import scrapy
 from scrapy_splash import SplashRequest
 
+from .common import DefaultSpider, DefaultLuaSpider
 
-class TestspiderSpider(scrapy.Spider):
+
+class TestspiderSpider(DefaultLuaSpider):
     name = "Testspider"
     allowed_domains = ["quotes.toscrape.com"]
     start_url = "https://quotes.toscrape.com/js/"
@@ -15,7 +17,6 @@ class TestspiderSpider(scrapy.Spider):
     """
 
     def start_requests(self, url=start_url):
-
         yield SplashRequest(url=url,
                             callback=self.parse,
                             endpoint='execute',
@@ -32,4 +33,3 @@ class TestspiderSpider(scrapy.Spider):
         if next_page is not None:
             url = response.urljoin(next_page)
             yield next(self.start_requests(url=url))
-
