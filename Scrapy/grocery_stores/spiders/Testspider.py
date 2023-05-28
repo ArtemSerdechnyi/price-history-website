@@ -1,7 +1,7 @@
 import scrapy
 from scrapy_splash import SplashRequest
 
-from .common import DefaultSpider, DefaultLuaSpider
+
 
 
 class TestspiderSpider(DefaultLuaSpider):
