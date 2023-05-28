@@ -51,19 +51,11 @@ class SpiderToolsSplashLua(SpiderTools):
                 lua_script: str = None) -> SplashRequest:
         if isinstance(url_s, str):
             url_s = [url_s]
-        if lua_script is not None:
-            self.lua_script = lua_script
-        args = {'lua_source': self.lua_script,
-                'wait': 0.5}
-        for url in url_s:
-            yield SplashRequest(url=url,
-                                callback=callback,
-                                args=args)
+        if lua_script is None:
+            lua_script = self.lua_script
         endpoint: str = 'execute'
-        args = {'lua_source': self.lua_script,
+        args = {'lua_source': lua_script,
                 'wait': 0.5}
-        if isinstance(url_s, str):
-            url_s = [url_s]
         for url in url_s:
             yield SplashRequest(url=url,
                                 callback=callback,
