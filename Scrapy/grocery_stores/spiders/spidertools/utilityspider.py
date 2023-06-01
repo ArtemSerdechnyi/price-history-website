@@ -1,4 +1,3 @@
-import scrapy
 from scrapy import Request as ScrapyRequest
 from scrapy_splash import SplashRequest
 
@@ -26,7 +25,7 @@ class UtilitySpider:
         endpoint: str = 'execute'
         args.setdefault('wait', 0.5)
         args.setdefault('lua_source', lua_script)
-        print('splash_request', url)
+        print('---splash_request:', url)
         yield SplashRequest(url=url,
                             callback=callback,
                             endpoint=endpoint,
@@ -36,5 +35,18 @@ class UtilitySpider:
     def request_pw(url: str,
                    callback: Callable) -> ScrapyRequest:
         meta = {'playwright': True}
-        print('pw_request', url)
+        print('---pw_request:', url)
         yield ScrapyRequest(url=url, callback=callback, meta=meta)
+
+    @staticmethod
+    def save_image(response: ScrapyRequest) -> None:
+        image = response.body
+
+    @staticmethod
+    def request_for_image(url: str,
+                          callback: Callable = save_image) -> ScrapyRequest:
+        print('---request_for_image:', url)
+        yield SplashRequest(url=url, callback=callback)
+
+
+

@@ -73,5 +73,50 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
                                            callback=self.parse_product)
 
     def parse_product(self, response: scrapy.http.Response):
-        name = response.xpath("//h1[@class='product-card__label h3']/text()").get()
-        print(name, 'name--------------------')
+
+        def get_price(response: scrapy.http.Response):
+            prices = response.xpath("//div[@class='product-card__price-inner']//p/text()").getall()
+            if len(prices) == 1:
+                return prices[0]
+            elif len(prices) == 3:
+                return prices[3]
+
+        product: dict[str, str | None] = {
+            'marketplace': 'Novus',
+            'name': response.xpath("//h1[@class='product-card__label h3']/text()").get(),
+            'product_url': response.url,
+            'image_url': response.urljoin(
+                response.xpath("//div[@class='base-slider product-card__slider']"
+                               "//img[@class='base-image__img']/@src").get()),
+            'price': get_price(response=response),
+            'full_price': response.xpath("//div[@class='product-card__price-inner']//p[1]").get(),
+            'brand': response.xpath(
+                "//div[@class='product-additional__parameter-item']/*[contains(text(),'Бренд')]"
+                "/following-sibling::*/text()").get(),
+            'country': response.xpath(
+                "//div[@class='product-additional__parameter-item']/*[contains(text(),'Країна')]"
+                "/following-sibling::*/text()").get(),
+            'expiration_date': response.xpath(
+                "//div[@class='product-additional__parameter-item']/*[contains(text(),'Термін придатності')]"
+                "/following-sibling::*/text()").get(),
+            'calories': response.xpath(
+                "//div[@class='product-additional__parameter']"
+                "//*[contains(text(),'Калорійність')]//following-sibling::*/text()").get(),
+            'protein': response.xpath(
+                "//div[@class='product-additional__parameter']"
+                "//*[contains(text(),'Білки')]//following-sibling::*/text()").get(),
+            'fats': response.xpath(
+                "//div[@class='product-additional__parameter']"
+                "//*[contains(text(),'Жири')]//following-sibling::*/text()").get(),
+            'carbohydrates': response.xpath(
+                "//div[@class='product-additional__parameter']"
+                "//*[contains(text(),'Вуглеводи')]//following-sibling::*/text()").get(),
+
+            'composition': response.xpath("//p[@class='p1']/text()").get(),
+
+        }
+        for key, value in product.items():
+            if isinstance(value, str):
+                product[key] = value.strip()
+
+        print(product)
