@@ -12,26 +12,40 @@ BOT_NAME = "grocery_stores"
 SPIDER_MODULES = ["grocery_stores.spiders"]
 NEWSPIDER_MODULE = "grocery_stores.spiders"
 
+REACTOR_THREADPOOL_MAXSIZE = 20
+
+# selenium
+# from shutil import which
+#
+# SELENIUM_DRIVER_NAME = 'chrome'
+# SELENIUM_DRIVER_EXECUTABLE_PATH = which('chromedriver')
+# # SELENIUM_DRIVER_ARGUMENTS = ['--no-headless']  # '--headless'
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy_selenium.SeleniumMiddleware': 800
+# }
+
 # playwright setup
 DOWNLOAD_HANDLERS = {
     "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
     "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
 }
-TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+
+PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 60 * 1000  # milliseconds
+PLAYWRIGHT_MAX_CONTEXTS = 5
 # PLAYWRIGHT_LAUNCH_OPTIONS = {"headless": False}  # set to True for headless browser
 
 # Splash Setup
-# SPLASH_URL = 'http://localhost:8050'
-# DOWNLOADER_MIDDLEWARES = {
-#     'scrapy_splash.SplashCookiesMiddleware': 723,
-#     'scrapy_splash.SplashMiddleware': 725,
-#     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-# }
-# SPIDER_MIDDLEWARES = {
-#     'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
-# }
-# DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
-# HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+SPLASH_URL = 'http://localhost:8050'
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+}
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "grocery_stores (+http://www.yourdomain.com)"

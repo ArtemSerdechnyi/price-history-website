@@ -3,8 +3,7 @@ from scrapy_splash import SplashRequest
 
 
 
-
-class TestspiderSpider(DefaultLuaSpider):
+class TestspiderSpider():
     name = "Testspider"
     allowed_domains = ["quotes.toscrape.com"]
     start_url = "https://quotes.toscrape.com/js/"
