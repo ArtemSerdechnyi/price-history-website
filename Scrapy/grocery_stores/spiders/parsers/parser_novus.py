@@ -3,20 +3,18 @@ from ..spidertools.rawpp import RawProductParser
 
 class NovusParser(RawProductParser):
 
-    def get_price(self, selector_xpath: str = None, selector_css: str = None):
-        if selector_xpath is not None:
-            price: str = self.response.xpath(selector_xpath).get()
-            selector = selector_xpath
-        elif selector_css is not None:
-            price: str = self.response.css(selector_css).get()
-            selector = selector_css
-        else:
-            raise AttributeError('Selector not found')
+    def get_image_url(self, selector_xpath: str = None, selector_css: str = None,
+                      item: str = 'image_url') -> str | None:
+        tail = self.get_item(item, selector_xpath, selector_css)
+        if tail is not None:
+            return self.response.urljoin(tail)
 
-        if price:
-            if len(price) == 1:
-                return price[0]
-            elif len(price) == 3:
-                return price[2]
-        else:
-            raise Exception(f'Price not found in URL: {self.response.url}\nSelector: {selector}')
+    def get_price(self, selector_xpath: str = None, selector_css: str = None,
+                  alternative_xpath: str = None, alternative_css: str = None,
+                  item: str = 'price') -> str | None:
+        price = self.get_item(item, selector_xpath, selector_css)
+        if price is not None:
+            return price
+        elif alternative_xpath or alternative_css:
+            price = self.get_item(item, alternative_xpath, alternative_css)
+            return price
