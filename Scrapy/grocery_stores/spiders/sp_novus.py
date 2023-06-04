@@ -54,11 +54,15 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
         last_page_number: str | None = response.xpath(
             "//div[@class='base-pagination__breakpoint base-pagination__end']"
             "//a[@class='base-is-link base-pagination__item p2']/text()").get()
+        if last_page_number is None:
+            last_page_number: str | None = response.xpath(
+                "//a[@class='base-is-link base-pagination__item p2'][last()]/text()").get()
         if last_page_number is not None:
             last_page_number: int = int(last_page_number.strip())
             subcategory_url = response.url
             for page in range(2, last_page_number + 1):
                 subcategory_page_url = self.add_pagination(url=subcategory_url, page=page)
+                print(subcategory_page_url, '---------')
                 yield from self.request_splash(url=subcategory_page_url,
                                                callback=self.parse_url_product)
 
