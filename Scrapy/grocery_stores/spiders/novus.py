@@ -20,7 +20,7 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
     #                        'https://novus.online/category/alkogol'
     #                        'https://novus.online/category/tutunovi-virobi-ta-aksesuari')
     start_urls_categories = ['https://novus.online/category/ovochi-frukty-ta-horikhy',
-                           'https://novus.online/category/maso-riba']
+                             'https://novus.online/category/maso-riba']
     custom_settings = {
         'PLAYWRIGHT_ABORT_REQUEST': lambda request:
         False if request.method == 'GET' and request.resource_type in {
@@ -29,10 +29,17 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
     }
 
     @staticmethod
-    def add_pagination(url: str, page: int) -> str:
-        if page > 1:
-            return f'{url}/page-{page}'
-        return url
+    def add_pagination(url: str) -> str:
+        if url.endswith("/"):
+            return url + "page-2"
+        else:
+            parts = url.rsplit("/", 1)
+            if parts[-1].startswith("page-"):
+                page_num = int(parts[-1].split("-")[-1])
+                new_page_num = page_num + 1
+                return parts[0] + "/page-" + str(new_page_num)
+            else:
+                return url + "/page-2"
 
     def start_requests(self) -> SplashRequest:
         for url_category in self.start_urls_categories:
@@ -46,35 +53,21 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
                 logging.log(logging.ERROR, f'Subcategory is not exist: {subcategory}\n'
                                            f'Subcategory URL: {response.url}')
             subcategory_url = response.urljoin(subcategory)
-            yield from self.request_pw(url=subcategory_url,
-                                       callback=self.parse_subcategory_first_page)
+            yield from self.request_splash(url=subcategory_url,
+                                           callback=self.parse_subcategory_page_recurs)
 
-    def parse_subcategory_first_page(self, response: scrapy.http.Response):
-        # parse product in first page
-        self.parse_url_product(response=response)
-
-        # parse all next pages
-        last_page_number: str | None = response.xpath(
-            "//div[@class='base-pagination__breakpoint base-pagination__end']"
-            "//a[@class='base-is-link base-pagination__item p2']/text()").get()
-        if last_page_number is None:
-            last_page_number: str | None = response.xpath(
-                "//a[@class='base-is-link base-pagination__item p2'][last()]/text()").get()
-        if last_page_number is not None:
-            last_page_number: int = int(last_page_number.strip())
-            subcategory_url = response.url
-            for page in range(2, last_page_number + 1):
-                subcategory_page_url = self.add_pagination(url=subcategory_url, page=page)
-                yield from self.request_splash(url=subcategory_page_url,
-                                               callback=self.parse_url_product)
-
-    def parse_url_product(self, response: scrapy.http.Response):
+    def parse_subcategory_page_recurs(self, response: scrapy.http.Response):
         partial_product_url_list = response.xpath(
             "//a[@class='base-is-link base-card catalog-products__item']/@href").getall()
-        product_url_list = map(response.urljoin, partial_product_url_list)
-        for product_url in product_url_list:
-            yield from self.request_splash(url=product_url,
-                                           callback=self.parse_product)
+        if partial_product_url_list:
+            product_url_list = map(response.urljoin, partial_product_url_list)
+            for product_url in product_url_list:
+                yield from self.request_splash(url=product_url,
+                                               callback=self.parse_product)
+            yield from self.request_splash(url=self.add_pagination(response.url),
+                                           callback=self.parse_subcategory_page_recurs)
+        else:
+            logging.log(logging.DEBUG, f'Category ended : {response.url}')
 
     def parse_product(self, response: scrapy.http.Response):
         pp = ParserProduct(response)
