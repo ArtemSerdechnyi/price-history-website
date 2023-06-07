@@ -19,7 +19,7 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
     #                        'https://novus.online/category/zamorozeni-produkti',
     #                        'https://novus.online/category/alkogol'
     #                        'https://novus.online/category/tutunovi-virobi-ta-aksesuari')
-    start_urls_category = ['https://novus.online/category/ovochi-frukty-ta-horikhy',
+    start_urls_categories = ['https://novus.online/category/ovochi-frukty-ta-horikhy',
                            'https://novus.online/category/maso-riba']
     custom_settings = {
         'PLAYWRIGHT_ABORT_REQUEST': lambda request:
@@ -35,13 +35,16 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
         return url
 
     def start_requests(self) -> SplashRequest:
-        for url_category in self.start_urls_category:
+        for url_category in self.start_urls_categories:
             yield from self.request_splash(url=url_category,
                                            callback=self.parse_url_subcategory)
 
     def parse_url_subcategory(self, response: scrapy.http.Response) -> scrapy.Request:
         subcategory_list = response.xpath("//div[@class='subcategories-list__item']/a/@href").getall()
         for subcategory in subcategory_list:
+            if not subcategory:
+                logging.log(logging.ERROR, f'Subcategory is not exist: {subcategory}\n'
+                                           f'Subcategory URL: {response.url}')
             subcategory_url = response.urljoin(subcategory)
             yield from self.request_pw(url=subcategory_url,
                                        callback=self.parse_subcategory_first_page)
@@ -62,7 +65,6 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
             subcategory_url = response.url
             for page in range(2, last_page_number + 1):
                 subcategory_page_url = self.add_pagination(url=subcategory_url, page=page)
-                print(subcategory_page_url, '---------')
                 yield from self.request_splash(url=subcategory_page_url,
                                                callback=self.parse_url_product)
 
