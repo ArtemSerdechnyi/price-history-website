@@ -4,6 +4,7 @@ from scrapy_splash import SplashRequest
 
 from .spidertools import UtilitySpider, RawProduct
 from .parsers import NovusParser as ParserProduct
+from .selectors import NovusXpath
 
 
 class NovusSpider(scrapy.Spider, UtilitySpider):
@@ -57,10 +58,10 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
                                            callback=self.parse_subcategory_page_recurs)
 
     def parse_subcategory_page_recurs(self, response: scrapy.http.Response):
-        partial_product_url_list = response.xpath(
+        partial_url_product_list = response.xpath(
             "//a[@class='base-is-link base-card catalog-products__item']/@href").getall()
-        if partial_product_url_list:
-            product_url_list = map(response.urljoin, partial_product_url_list)
+        if partial_url_product_list:
+            product_url_list = map(response.urljoin, partial_url_product_list)
             for product_url in product_url_list:
                 yield from self.request_splash(url=product_url,
                                                callback=self.parse_product)
@@ -71,6 +72,8 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
 
     def parse_product(self, response: scrapy.http.Response):
         pp = ParserProduct(response)
+
+
 
         product_raw: RawProduct = RawProduct(
             marketplace=pp.get_marketplace('Novus'),
