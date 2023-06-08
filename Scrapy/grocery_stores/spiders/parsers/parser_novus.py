@@ -18,3 +18,13 @@ class NovusParser(RawProductParser):
         elif alternative_xpath or alternative_css:
             price = self.get_item(item, alternative_xpath, alternative_css)
             return price
+
+    def get_product_weight(self, selector_xpath: str = None,
+                           selector_css: str = None,
+                           item: str = 'product_weight'):
+        return None
+
+    def get_unit(self, selector_xpath: str = None,
+                 selector_css: str = None,
+                 item: str = 'unit') -> str | None:
+        return None
