@@ -8,17 +8,8 @@ class Product:
     product_url: Any
     price: Any
     full_price: Any
-    product_weight: Any
-    unit: Any
+    capacity: Any
     image_url: Any
-    brand: Any
-    country: Any
-    expiration_date: Any
-    calories: Any
-    protein: Any
-    fats: Any
-    carbohydrates: Any
-    composition: Any
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -27,18 +18,9 @@ class RawProduct(Product):
     name: str
     product_url: str
     price: str
-    full_price: Optional[str]
-    product_weight: Optional[str]
-    unit: Optional[str]
-    image_url: Optional[str]
-    brand: Optional[str]
-    country: Optional[str]
-    expiration_date: Optional[str]
-    calories: Optional[str]
-    protein: Optional[str]
-    fats: Optional[str]
-    carbohydrates: Optional[str]
-    composition: Optional[str]
+    full_price: str
+    capacity: str
+    image_url: str
 
 
 @dataclass(frozen=True, eq=False, slots=True)

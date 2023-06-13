@@ -17,11 +17,10 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
     #                        'https://novus.online/category/zootovari',
     #                        'https://novus.online/category/solodosi-sneki',
     #                        'https://novus.online/category/napoi',
-    #                        'https://novus.online/category/zamorozeni-produkti',
+    #                    -    'https://novus.online/category/zamorozeni-produkti',
     #                        'https://novus.online/category/alkogol'
     #                        'https://novus.online/category/tutunovi-virobi-ta-aksesuari')
-    start_urls_categories = ['https://novus.online/category/ovochi-frukty-ta-horikhy',
-                             'https://novus.online/category/maso-riba']
+    start_urls_categories = ['https://novus.online/category/ovochi-frukty-ta-horikhy']
     custom_settings = {
         'PLAYWRIGHT_ABORT_REQUEST': lambda request:
         False if request.method == 'GET' and request.resource_type in {
@@ -30,7 +29,7 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
     }
 
     @staticmethod
-    def add_pagination(url: str) -> str:
+    def next_page(url: str) -> str:
         if url.endswith("/"):
             return url + "page-2"
         else:
@@ -58,38 +57,24 @@ class NovusSpider(scrapy.Spider, UtilitySpider):
                                            callback=self.parse_subcategory_page_recursive)
 
     def parse_subcategory_page_recursive(self, response: scrapy.http.Response):
-        partial_url_product_list = response.xpath(Xpath().partial_url_product_list).getall()
-        if partial_url_product_list:
-            product_url_list = map(response.urljoin, partial_url_product_list)
-            for product_url in product_url_list:
-                yield from self.request_splash(url=product_url,
-                                               callback=self.parse_product)
-            yield from self.request_splash(url=self.add_pagination(response.url),
+        products_list: list[scrapy.Selector] = response.xpath(Xpath().products_list)
+        if products_list:
+            for product_card in products_list:
+                pp = ParserProduct(response=response, selector=product_card)
+                xp_p = Xpath().product
+                product_raw: RawProduct = RawProduct(
+                    marketplace='Novus',
+                    name=pp.get_name(selector_xpath=xp_p.name),
+                    product_url=pp.get_product_url(selector_xpath=xp_p.product_url),
+                    image_url=pp.get_image_url(selector_xpath=xp_p.image_url),
+                    price=pp.get_price(selector_xpath=xp_p.price.selector_xpath,
+                                       alternative_xpath=xp_p.price.alternative_xpath),
+                    full_price=pp.get_full_price(selector_xpath=xp_p.full_price),
+                    capacity=pp.get_capacity(selector_xpath=xp_p.capacity),
+                )
+                
+
+            yield from self.request_splash(url=self.next_page(response.url),
                                            callback=self.parse_subcategory_page_recursive)
         else:
             logging.log(logging.DEBUG, f'Category ended : {response.url}')
-
-    def parse_product(self, response: scrapy.http.Response):
-        pp = ParserProduct(response)
-        xp_p = Xpath().product
-
-        product_raw: RawProduct = RawProduct(
-            marketplace=pp.get_marketplace('Novus'),
-            name=pp.get_name(selector_xpath=xp_p.name),
-            product_url=pp.get_product_url(),
-            image_url=pp.get_image_url(selector_xpath=xp_p.image_url),
-            price=pp.get_price(selector_xpath=xp_p.price.selector_xpath,
-                               alternative_xpath=xp_p.price.alternative_xpath),
-            full_price=pp.get_full_price(selector_xpath=xp_p.full_price),
-            product_weight=pp.get_product_weight(),  # get from name
-            unit=pp.get_unit(),  # get from name
-            brand=pp.get_brand(selector_xpath=xp_p.brand),
-            country=pp.get_country(selector_xpath=xp_p.country),
-            expiration_date=pp.get_expiration_date(selector_xpath=xp_p.expiration_date),
-            calories=pp.get_calories(selector_xpath=xp_p.calories),
-            protein=pp.get_protein(selector_xpath=xp_p.protein),
-            fats=pp.get_fats(selector_xpath=xp_p.fats),
-            carbohydrates=pp.get_carbohydrates(selector_xpath=xp_p.carbohydrates),
-            composition=pp.get_composition(selector_xpath=xp_p.composition)
-        )
-
