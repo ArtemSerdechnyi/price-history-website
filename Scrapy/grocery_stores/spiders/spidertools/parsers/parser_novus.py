@@ -5,8 +5,7 @@ class NovusParser(RawProductParser):
 
     def get_name(self, selector_xpath: str = None,
                  item: str = 'name') -> str | None:
-        names: list[str | None] = self._get_all_items(item, selector_xpath)
-        name: str = ' '.join((n for n in names if n is not None))
+        name: str | None = self._get_item(item, selector_xpath)
         return name
 
     def get_image_url(self, selector_xpath: str = None,

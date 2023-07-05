@@ -1,4 +1,4 @@
-from ..spidertools import Product
+from Scrapy.grocery_stores.spiders.spidertools import Product
 from ._base_selector import BaseSelector
 
 from dataclasses import dataclass

@@ -26,4 +26,3 @@ class RawProduct(Product):
 @dataclass(frozen=True, eq=False, slots=True)
 class CleanProduct(Product):  # todo not end
     marketplace: str
-    ...

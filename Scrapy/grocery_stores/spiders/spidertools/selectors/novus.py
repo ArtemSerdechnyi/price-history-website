@@ -1,4 +1,4 @@
-from ..spidertools import Product
+from Scrapy.grocery_stores.items import Product
 from ._base_selector import BaseSelector
 
 from dataclasses import dataclass
@@ -29,3 +29,4 @@ class NovusXpath(NovusSelector):
                                                      "base-card__price-current_red']/text()"),
                                full_price=".//p[@class='base-card__price-old p3']/text()",
                                capacity=".//p[@class='base-card__capacity p3']/text()")
+

@@ -1,19 +1,17 @@
-# Define here the models for your scraped items
-from django.db import models
-
-# See documentation in: import models
-
-# See documentation in:
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
-
 import scrapy
+
+
+class TestItem(scrapy.Item):
+    url = scrapy.Field()
+    name = scrapy.Field(default=2)
+    price = scrapy.Field()
 
 
 class Product(scrapy.Item):
     shop_id = scrapy.Field()
-    category_id = scrapy.Field()
+    category = scrapy.Field()
+    subcategory = scrapy.Field()
+    raw_name = scrapy.Field()
     name = scrapy.Field()
     url = scrapy.Field()
     image_path = scrapy.Field()
@@ -21,16 +19,17 @@ class Product(scrapy.Item):
     unit = scrapy.Field()
     description = scrapy.Field()
     composition = scrapy.Field()
+    country = scrapy.Field()
+    calories = scrapy.Field()
+    carbohydrates = scrapy.Field()
+    fats = scrapy.Field()
+    proteins = scrapy.Field()
 
 
-class ProductPriceHistory(scrapy.Item):
+class ProductUpdate(scrapy.Item):
     product_id = scrapy.Field()
+    raw_price = scrapy.Field()
     price = scrapy.Field()
+    raw_old_price = scrapy.Field()
     old_price = scrapy.Field()
     date = scrapy.Field()
-
-
-class GroceryStoresItem(scrapy.Item):
-    # define the fields for your item here like:
-    name = scrapy.Field(input_processor=None, output_processor=None)
-    pass
