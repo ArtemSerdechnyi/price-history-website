@@ -10,6 +10,7 @@ class Category(models.Model):
 
     class Meta:
         db_table = 'category'
+        ordering = ['category_name']
 
 
 class Subcategory(models.Model):
@@ -21,15 +22,16 @@ class Subcategory(models.Model):
 
     class Meta:
         db_table = 'subcategory'
+        ordering = ['category__category_name', 'subcategory']
 
 
-class RawSubcategoryRelation(models.Model):
+class RawSubcategory(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    raw_subcategory_url = models.URLField(unique=True, primary_key=True)
+    url = models.URLField(unique=True, primary_key=True)
     subcategory = models.ManyToManyField(Subcategory)
 
     def __str__(self):
-        return f'{self.subcategory} --> {self.raw_subcategory_url}'
+        return f'{self.subcategory} | {self.url}'
 
     class Meta:
         db_table = 'raw_subcategory'

@@ -2,7 +2,7 @@ from django.db import models
 from datetime import date
 
 from ..Core.models import Shop
-from ..Category.models import Subcategory
+from ..Category.models import Subcategory, RawSubcategory
 
 
 class ProcessedProduct(models.Model):
@@ -33,7 +33,7 @@ class RawProduct(models.Model):
     raw_subcategory = models.CharField(null=True, blank=True)
     raw_name = models.CharField()
     processed_product = models.ForeignKey(ProcessedProduct, on_delete=models.SET_NULL, null=True, blank=True)
-    url = models.URLField(unique=True)
+    url = models.ForeignKey(RawSubcategory, on_delete=models.CASCADE)
     image_path = models.ImageField(upload_to='RawProduct/', null=True, blank=True)
     raw_weight = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     raw_unit = models.CharField(max_length=16, null=True, blank=True)
